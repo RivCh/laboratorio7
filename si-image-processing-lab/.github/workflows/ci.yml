@@ -1,0 +1,52 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código fuente del repositorio en la máquina virtual
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurar la versión correcta de Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Instalar Poetry (Manejador de dependencias)
+      - name: Install Poetry
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      # 4. Cachear dependencias para que el pipeline corra más rápido en el futuro
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: pydeps-${{ hashFiles('**/poetry.lock') }}
+
+      # 5. Instalar todas las librerías del proyecto (Kedro, Pillow, Pytest, Ruff)
+      - name: Install dependencies
+        run: poetry install
+
+      # 6. Ejecutar el Linter (Ruff) para comprobar el estilo del código fuente
+      - name: Run Ruff Linter
+        run: poetry run ruff check .
+
+      # 7. Ejecutar las pruebas unitarias (Pytest) y generar reporte de cobertura
+      - name: Run Unit Tests
+        run: poetry run pytest

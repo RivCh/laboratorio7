@@ -1,0 +1,7 @@
+# Here you can define all your datasets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
+processed_image:
+  type: kedro_datasets.text.TextDataset
+  filepath: data/03_primary/processed_image_path.txt
